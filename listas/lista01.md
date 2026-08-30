@@ -122,3 +122,7 @@ INSERT INTO orders_products (order_id, product_id, quantity, unit_price) VALUES
 13.	Liste a quantidade de pedidos realizados por cada usuário.
 14.	Listar os três produtos mais vendidos.
 15.	Gerar um relatório com: usuários, quantidade de pedidos e valor total comprado.
+
+## Resolução
+
+Script SQL comentado - [lista01.sql](resolucoes/lista01.sql)
