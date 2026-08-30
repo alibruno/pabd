@@ -33,13 +33,65 @@ SELECT
     o.id order_id,
     o.order_date,
     o.status order_status,
-    o.total total
+    o.total
 FROM orders o
 JOIN users u ON o.user_id = u.id;
 
 -- 8.	Liste todos os usuários e seus pedidos, inclusive usuários sem pedidos.
+SELECT
+    u.name user_name,
+    o.id order_id,
+    o.order_date,
+    o.status order_status,
+    o.total
+FROM orders o
+RIGHT JOIN users u ON o.user_id = u.id
+ORDER BY u.name, o.id NULLS LAST;
+
 -- 9.	Liste todos os usuários (id, nome e email) que realizaram pelo menos um pedido.
+SELECT 
+    u.id,
+    u.name,
+    u.email
+FROM users u
+WHERE EXISTS (
+    SELECT *
+    FROM orders o 
+    WHERE o.user_id = u.id
+);
+
 -- 10.	Liste produtos que nunca foram vendidos.
+
+    /*
+    Caso 1: Existe pedido associado? 
+    Caso 2: Se tiver pedido associado, todos foram cancelados 
+            e portanto não foram vendidos?
+    
+    Exemplo:
+
+    order.id = {1, 2, 3, 4}
+    product.id = {1, 2, 3, 4}
+    orders_products = { 
+        o.id = 1 | p.id = 1 | o.status = paid, 
+        o.id = 2 | p.id = 2 | o.status = canceled,
+        o.id = 3 | p.id = 2 | o.status = paid,
+        o.id = 4 | p.id = 3 | o.status = canceled,
+    }
+    
+    4 - 1º filtro - não tem pedido associado
+    3 - 2º filtro - tem pedido associado mas todos foram cancelados
+    */
+
+SELECT * FROM products p
+WHERE EXISTS (
+    SELECT *
+    FROM orders_products op
+    JOIN orders o ON op.order_id = o.id
+    WHERE 
+        op.product_id <> p.id
+        OR (op.product_id = p.id AND o.status = 'canceled')
+);
+
 -- 11.	Liste usuários que nunca realizaram pedidos.
 -- 12.	Liste os produtos com preço acima da média em ordem decrescente.
 -- 13.	Liste a quantidade de pedidos realizados por cada usuário.
