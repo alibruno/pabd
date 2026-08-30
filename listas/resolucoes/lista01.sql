@@ -82,18 +82,68 @@ WHERE EXISTS (
     3 - 2º filtro - tem pedido associado mas todos foram cancelados
     */
 
-SELECT * FROM products p
-WHERE EXISTS (
+-- Query: Não existe NENHUM pedido deste produto com status diferente de 'canceled'.
+-- (NAND)
+SELECT p.* 
+FROM products p
+WHERE NOT EXISTS (
     SELECT *
     FROM orders_products op
     JOIN orders o ON op.order_id = o.id
-    WHERE 
-        op.product_id <> p.id
-        OR (op.product_id = p.id AND o.status = 'canceled')
+    WHERE op.product_id = p.id
+      AND o.status != 'canceled'
 );
 
 -- 11.	Liste usuários que nunca realizaram pedidos.
+SELECT * FROM users u
+WHERE NOT EXISTS (
+    SELECT *
+    FROM orders o 
+    WHERE o.user_id = u.id
+);
+
 -- 12.	Liste os produtos com preço acima da média em ordem decrescente.
+SELECT * FROM products p
+WHERE p.price > (
+    SELECT AVG(price) 
+    FROM products
+)
+ORDER BY p.price DESC;
+
 -- 13.	Liste a quantidade de pedidos realizados por cada usuário.
+SELECT 
+    u.id user_id,
+    u.name user_name,
+    COUNT(o.id) orders_count
+FROM users u
+LEFT JOIN orders o 
+    ON u.id = o.user_id 
+   AND o.status != 'canceled'
+GROUP BY u.id, u.name;
+
 -- 14.	Listar os três produtos mais vendidos.
+SELECT 
+    p.id,
+    p.name,
+    p.price,
+    SUM(op.quantity) total_count
+FROM products p
+JOIN orders_products op ON p.id = op.product_id
+JOIN orders o ON op.order_id = o.id
+WHERE o.status != 'canceled'
+GROUP BY p.id
+ORDER BY total_count DESC
+LIMIT 3;
+
 -- 15.	Gerar um relatório com: usuários, quantidade de pedidos e valor total comprado.
+SELECT 
+    u.id user_id,
+    u.name user_name,
+    COUNT(o.id) orders_count,
+    COALESCE(SUM(o.total), 0) total_purchased
+FROM users u
+LEFT JOIN orders o 
+    ON u.id = o.user_id 
+   AND o.status != 'canceled'
+GROUP BY u.id, u.name
+ORDER BY total_purchased DESC;
