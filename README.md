@@ -8,9 +8,9 @@
 
 ## Startar banco já configurado no codespaces:
 
-- Padrão: ./utils/start_pabd.sh
-- dvdrental: ./utils/start_dvdrental.sh
-- f1db: ./utils/start_f1db.sh
+- Padrão: `./utils/start_pabd.sh`
+- dvdrental: `./utils/start_dvdrental.sh`
+- f1db: `./utils/start_f1db.sh`
 
 ## Comandos úteis do psql
 
@@ -133,11 +133,11 @@ Para testar, entre no `psql` e digite:
 
 Para exibir todas as tabelas: `\dt`
 
-# 9. Criando banco de dados f1db
+# 9. Criando banco de dados `f1db`
 
 Faça o donwload no link (https://github.com/f1db/f1db/releases/download/v2026.16.0/f1db-sql-postgresql.zip). 
 
-Após descompactar, coloque o arquivo na pasta `desafio`.
+Após descompactar, coloque o arquivo na pasta `desafios`.
 
 Entre no psql:
 
