@@ -231,7 +231,7 @@ CREATE FUNCTION fn_insert_update_rental_return_date()
     LANGUAGE PLPGSQL
 AS $$
 BEGIN
-    IF NEW.return_date IS NULL THEN
+    IF NEW.rental_date IS NULL THEN
         RAISE EXCEPTION 'rental_date cannot be NULL';
     
     ELSIF NEW.return_date < NEW.rental_date THEN
@@ -368,3 +368,59 @@ DELETE FROM language WHERE language_id = 1;
 
 INSERT INTO language (name) VALUES ('Portuguese');
 DELETE FROM language WHERE language_id = 7;
+
+
+
+--- Questão 10 - Sincronização de Estatísticas
+
+DROP TRIGGER IF EXISTS trg_update_increment_from_custumer_rental ON rental;
+DROP FUNCTION IF EXISTS fn_update_increment_from_custumer_rental;
+DROP TABLE IF EXISTS customer_rental_stats;
+
+CREATE TABLE customer_rental_stats (
+    customer_rental_stats_id SERIAL PRIMARY KEY,
+    customer_id INT NOT NULL,
+    total_rentals INT DEFAULT 0,
+
+    CONSTRAINT fk_customer
+        FOREIGN KEY (customer_id) 
+        REFERENCES customer (customer_id)
+        ON DELETE CASCADE
+);
+
+INSERT INTO customer_rental_stats (customer_id, total_rentals)
+SELECT customer_id, COUNT(rental_id) FROM rental GROUP BY customer_id;
+
+CREATE FUNCTION fn_update_increment_from_custumer_rental()
+    RETURNS TRIGGER
+    LANGUAGE PLPGSQL
+AS $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM customer_rental_stats AS c WHERE c.customer_id = NEW.customer_id
+    ) THEN  
+        INSERT INTO customer_rental_stats (customer_id, total_rentals) VALUES (NEW.customer_id, 1);
+        RETURN NEW;
+    END IF;
+
+    UPDATE customer_rental_stats
+    SET total_rentals = total_rentals + 1
+    WHERE customer_id = NEW.customer_id;
+
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_update_increment_from_custumer_rental
+    AFTER INSERT
+    ON rental
+    FOR EACH ROW
+    EXECUTE FUNCTION fn_update_increment_from_custumer_rental();
+
+SELECT * FROM customer_rental_stats WHERE customer_id = 1;
+
+INSERT INTO rental (rental_date, inventory_id, customer_id, staff_id)
+VALUES (now(), 1, 1, 1);
+
+-- Atual = 34
+-- Após INSERT INTO = 35

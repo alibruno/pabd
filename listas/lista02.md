@@ -80,3 +80,7 @@ Para evitar contar as linhas da tabela `rental` toda vez que quisermos saber qua
 - Crie a tabela `customer_rental_stats` (`customer_id` PK, `total_rentals` INT DEFAULT 0).
 - Popule-a inicialmente com os dados atuais.
 - Crie uma trigger `AFTER INSERT` na tabela `rental` que, a cada nova locação, atualize (incremento `+1`) o contador do respectivo cliente na tabela de estatísticas (verifique a existência).
+
+## Resolução
+
+Script SQL comentado - [lista02.sql](resolucoes/lista02.sql)
